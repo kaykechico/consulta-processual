@@ -5,16 +5,11 @@ export default {
       screens: {
         xs: "380px"
       },
-      boxShadow: {
-        premium: "0 24px 90px rgba(0,0,0,.55)",
-        insetPremium: "inset 0 1px 0 rgba(255,255,255,.07)"
+      fontFamily: {
+        display: ["Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Georgia", "serif"]
       },
       colors: {
-        carbon: {
-          950: "#020202",
-          900: "#070707",
-          800: "#111111"
-        }
+        accent: "#c1a06a"
       }
     }
   },

@@ -2,19 +2,17 @@ import { Loader2 } from "lucide-react";
 
 export default function LoadingState() {
   return (
-    <section className="surface rounded-2xl p-6 sm:p-10">
+    <section className="surface rounded-xl p-7 sm:p-10">
       <div className="flex flex-col items-center justify-center gap-4 text-center">
-        <div className="surface-muted flex h-14 w-14 items-center justify-center rounded-2xl">
-          <Loader2 size={26} className="animate-spin text-zinc-300" />
-        </div>
+        <Loader2 size={23} className="animate-spin text-accent" />
 
         <div>
-          <h2 className="text-lg font-bold tracking-[-0.035em] text-zinc-100">
-            Processando consulta processual
+          <h2 className="text-base font-medium text-slate-200">
+            Buscando processo...
           </h2>
 
-          <p className="mt-1 text-sm text-zinc-500">
-            Aguarde a recuperação das informações públicas disponíveis.
+          <p className="mt-1.5 text-sm text-slate-500">
+            Isso pode levar alguns segundos.
           </p>
         </div>
       </div>

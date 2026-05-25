@@ -1,68 +1,25 @@
 # Consulta Processual
 
-Projeto de estudo para consulta processual por número CNJ usando a API pública DataJud/CNJ.
+Aplicação para consultar dados públicos de processos pelo número CNJ, usando a API Pública DataJud.
 
-## Objetivo
+## O que faz
 
-Este projeto foi criado para estudar uma arquitetura simples de consulta processual com separação entre backend e frontend:
+- Valida a numeração CNJ informada.
+- Identifica o tribunal quando possível.
+- Exibe dados do processo e andamentos disponíveis.
+- Mantém as consultas recentes no navegador.
+- Trata indisponibilidade, limite de requisições e tempo de espera.
 
-- **Backend** em Node.js/Express para validação do número CNJ, consulta ao DataJud e tratamento de erros.
-- **Frontend** em React/Vite para entrada do número processual, exibição sob demanda dos dados retornados e histórico local de consultas.
+O frontend foi desenhado para uma consulta direta, sem excesso de elementos na tela. O backend centraliza a validação, o acesso ao DataJud e o tratamento de falhas.
 
-## Funcionalidades
+## Tecnologias
 
-- Validação de número CNJ com 20 dígitos.
-- Detecção do tribunal com base no padrão CNJ.
-- Consulta à API pública DataJud/CNJ.
-- Busca ampliada em outros tribunais quando habilitada, com concorrência limitada e cancelamento após resultado útil.
-- Tratamento de timeout, retry, erros transitórios e limite de requisições.
-- Interface responsiva com estados de carregamento, erro e resultado.
-- Histórico local de consultas recentes no navegador.
-- Carregamento sob demanda dos componentes de resultado para reduzir o JavaScript inicial.
+- Frontend: React, Vite, Tailwind CSS e Axios.
+- Backend: Node.js, Express e Axios.
 
-## Stack
+## Rodar localmente
 
-### Backend
-
-- Node.js
-- Express
-- Axios
-- dotenv
-- helmet
-- cors
-- compression
-- express-rate-limit
-- morgan
-
-### Frontend
-
-- React
-- Vite
-- Tailwind CSS
-- Axios
-- Lucide React
-
-## Estrutura
-
-```text
-consulta-processual/
-  backend/
-    src/
-      controllers/
-      middleware/
-      routes/
-      services/
-      utils/
-  frontend/
-    src/
-      api/
-      components/
-      utils/
-```
-
-## Como rodar
-
-### Backend
+Em um terminal:
 
 ```bash
 cd backend
@@ -70,19 +27,7 @@ npm install
 npm run dev
 ```
 
-O backend roda por padrão em:
-
-```text
-http://localhost:3001
-```
-
-Healthcheck:
-
-```text
-http://localhost:3001/health
-```
-
-### Frontend
+Em outro terminal:
 
 ```bash
 cd frontend
@@ -90,25 +35,22 @@ npm install
 npm run dev
 ```
 
-O frontend roda por padrão em:
+Endereços locais:
 
-```text
-http://localhost:5173
-```
+- Site: `http://localhost:5173`
+- API: `http://localhost:3001`
+- Saúde da API: `http://localhost:3001/health`
 
-## Configuração relevante
+## Configuração
 
-- `frontend/.env`: `VITE_API_TIMEOUT_MS=100000`, dando margem para a resposta controlada do backend.
-- `frontend/vite.config.js` e `frontend/nginx.conf`: proxy de `/api` configurado para até 100 segundos.
-- `backend/.env`: `DATAJUD_ENABLE_FALLBACK` controla a busca ampliada e `DATAJUD_FALLBACK_CONCURRENCY` limita consultas paralelas.
+O backend precisa de uma chave válida do DataJud em `backend/.env`:
 
-## Otimizações aplicadas
+Configurações úteis já presentes no projeto:
 
-- Telas de resumo e andamentos são carregadas somente após uma consulta bem-sucedida.
-- Formatadores e tabelas de tradução/correção são reutilizados durante a renderização.
-- A busca ampliada cancela chamadas paralelas restantes quando encontra um resultado ou erro impeditivo.
-
+- `DATAJUD_ENABLE_FALLBACK`: habilita busca em outros tribunais quando a consulta direta não encontra resultado.
+- `DATAJUD_FALLBACK_CONCURRENCY`: limita a quantidade de consultas simultâneas na busca ampliada.
+- `VITE_API_TIMEOUT_MS`: define quanto tempo o frontend espera pela API.
 
 ## Observação
 
-Este é um projeto de estudo. Antes de qualquer uso em produção, revise limites da API, tratamento de dados, logs, privacidade e requisitos legais aplicáveis.
+Este projeto consulta informações públicas disponíveis na fonte oficial. Antes de utilizá-lo em produção, revise limites da API, privacidade, logs e requisitos legais aplicáveis.

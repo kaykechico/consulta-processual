@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Database, RotateCcw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Scale } from "lucide-react";
 import { consultarProcesso, verificarConexaoApi } from "./api/processos.api";
 import SearchForm from "./components/SearchForm";
 import RecentSearches from "./components/RecentSearches";
@@ -136,35 +136,38 @@ export default function App() {
   const modoResultado = Boolean(resultado?.success || erro || loading);
 
   return (
-    <main className="app-shell relative min-h-[100dvh] overflow-x-hidden text-zinc-100">
+    <main className="app-shell relative min-h-[100dvh] overflow-x-hidden">
       {!modoResultado && (
-        <section className="page-padding relative flex min-h-[100dvh] items-center justify-center py-6 sm:py-10">
-          <div className="w-full max-w-[620px]">
-            <div className="mb-6 text-center sm:mb-8">
-              <div className="surface-muted mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl sm:mb-5 sm:h-14 sm:w-14">
-                <Database size={20} className="text-zinc-300" />
+        <section className="page-padding relative flex min-h-[100dvh] items-center justify-center py-8 sm:py-12">
+          <div className="w-full max-w-[600px]">
+            <div className="mb-9 sm:mb-10">
+              <div className="mb-7 inline-flex items-center gap-2.5 text-sm font-medium text-slate-300">
+                <span className="brand-mark flex h-9 w-9 items-center justify-center rounded-lg">
+                  <Scale size={18} />
+                </span>
+                Consulta Processual
               </div>
 
-              <h1 className="text-[clamp(1.75rem,6vw,2.75rem)] font-semibold tracking-[-0.055em] text-white">
-                Consulta Jurídica
+              <h1 className="display-title max-w-[520px] text-[clamp(2.35rem,7vw,3.55rem)] font-medium leading-[1.08] text-slate-100">
+                Encontre um processo pelo número CNJ.
               </h1>
 
-              <p className="mt-2 text-sm font-medium tracking-[-0.01em] text-zinc-500 sm:mt-3">
-                Pesquisa processual por número CNJ
+              <p className="mt-4 max-w-[470px] text-sm leading-6 text-slate-400">
+                Consulte dados públicos disponíveis no DataJud de forma simples e direta.
               </p>
             </div>
 
             {!apiOnline && (
               <div
                 role="status"
-                className="mb-4 rounded-xl border border-amber-400/20 bg-amber-500/10 px-3.5 py-2.5 text-center text-xs font-medium leading-5 text-amber-100/90"
+                className="mb-5 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-center text-xs font-medium leading-5 text-amber-100/90"
               >
                 Servidor de consulta indisponível no momento. Verifique se o backend está em
                 execução.
               </div>
             )}
 
-            <SearchForm onSubmit={handleConsultar} loading={loading} compact />
+            <SearchForm onSubmit={handleConsultar} loading={loading} />
 
             <RecentSearches
               items={recentes}
@@ -177,27 +180,33 @@ export default function App() {
       )}
 
       {modoResultado && (
-        <section className="page-padding relative mx-auto min-h-[100dvh] w-full max-w-[980px] py-4 sm:py-7 lg:py-9">
-          <div className="sticky top-0 z-10 -mx-1 mb-4 rounded-2xl border border-white/5 bg-[#050505]/90 px-1 py-3 backdrop-blur-md sm:static sm:mb-5 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+        <section className="page-padding relative mx-auto min-h-[100dvh] w-full max-w-[1020px] py-4 sm:py-8 lg:py-10">
+          <header className="result-header sticky top-3 z-10 mb-5 rounded-xl px-4 py-3 backdrop-blur-xl sm:static sm:mb-7 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0 text-xs leading-5 text-zinc-500">
-                <span className="block sm:inline">Processo consultado </span>
-                <span className="block break-all font-semibold text-zinc-300 sm:inline">
+              <div className="min-w-0">
+                <p className="text-xs text-slate-500">Processo consultado</p>
+                <h1 className="mt-1 block break-all font-display text-[1.3rem] font-medium tracking-[-0.025em] text-slate-100 sm:text-[1.55rem]">
                   {resultado?.numeroFormatado || ultimoNumero}
-                </span>
+                </h1>
+                {resultado?.success && (
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Fonte: DataJud/CNJ
+                    {resultado.buscaAmpla ? " - busca ampliada" : ""}
+                  </p>
+                )}
               </div>
 
               <button
                 type="button"
                 onClick={novaConsulta}
-                className="control inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-full px-3.5 py-2.5 text-zinc-300 sm:w-auto"
+                className="control inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold text-slate-300 sm:w-auto"
               >
                 <ArrowLeft size={14} />
                 Nova consulta
               </button>
             </div>
 
-          </div>
+          </header>
 
           {loading && <LoadingState />}
 
@@ -210,23 +219,7 @@ export default function App() {
 
           {!loading && resultado?.success && (
             <Suspense fallback={<LoadingState />}>
-              <div className="space-y-3 sm:space-y-4">
-                <div className="surface-muted rounded-2xl p-3.5 sm:p-4">
-                  <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    <div className="inline-flex items-center gap-2 text-xs font-medium text-zinc-400">
-                      <ShieldCheck size={14} className="shrink-0" />
-                      Fonte oficial: DataJud/CNJ
-                    </div>
-
-                    {resultado.buscaAmpla && (
-                      <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[11px] font-medium text-zinc-400">
-                        <RotateCcw size={12} className="shrink-0" />
-                        Pesquisa ampliada realizada
-                      </div>
-                    )}
-                  </div>
-                </div>
-
+              <div className="space-y-4">
                 <ProcessSummary resultado={resultado} />
                 <MovementsTimeline resultado={resultado} />
               </div>
