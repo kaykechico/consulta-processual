@@ -2,12 +2,20 @@ export function getSource(resultado) {
   return resultado?.data?.source || {};
 }
 
+let mapaCorrecoesTexto;
+let mapaTraducoes;
+let mapaChaves;
+const formatadorData = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short"
+});
+
 export function corrigirTexto(texto) {
   if (typeof texto !== "string") {
     return texto;
   }
 
-  const mapa = [
+  const mapa = (mapaCorrecoesTexto ||= [
     ["Ã¡", "á"],
     ["Ã ", "à"],
     ["Ã¢", "â"],
@@ -69,7 +77,7 @@ export function corrigirTexto(texto) {
     ["â€œ", "“"],
     ["â€�", "”"],
     ["â€¦", "…"]
-  ];
+  ]);
 
   return mapa.reduce((resultado, [errado, correto]) => {
     return resultado.replaceAll(errado, correto);
@@ -87,16 +95,13 @@ export function formatarData(value) {
     return corrigirTexto(String(value));
   }
 
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short"
-  }).format(date);
+  return formatadorData.format(date);
 }
 
 export function traduzirValor(value) {
   const texto = corrigirTexto(String(value));
 
-  const mapa = {
+  const mapa = (mapaTraducoes ||= {
     api_publica_stj: "Superior Tribunal de Justiça",
     api_publica_tst: "Tribunal Superior do Trabalho",
     api_publica_tse: "Tribunal Superior Eleitoral",
@@ -138,7 +143,7 @@ export function traduzirValor(value) {
     G2: "2º grau",
     JE: "Juizado especial",
     TR: "Turma recursal"
-  };
+  });
 
   if (mapa[texto]) {
     return mapa[texto];
@@ -223,7 +228,7 @@ export function extrairNome(value) {
 }
 
 export function humanizarChave(key) {
-  const mapa = {
+  const mapa = (mapaChaves ||= {
     numeroProcesso: "Número do processo",
     classe: "Classe processual",
     classeProcessual: "Classe processual",
@@ -249,7 +254,7 @@ export function humanizarChave(key) {
     score: "Relevância da consulta",
     timestamp: "Data técnica de atualização",
     processoEletronico: "Processo eletrônico"
-  };
+  });
 
   if (mapa[key]) {
     return mapa[key];

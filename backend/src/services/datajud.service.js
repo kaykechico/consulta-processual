@@ -200,10 +200,18 @@ async function consultarComConcorrenciaLimitada(numeroProcesso, aliases, limite,
   let indice = 0;
   let encontrado = null;
   let erroFatal = null;
+  const controller = new AbortController();
+  const cancelarBusca = () => controller.abort();
+
+  if (signal?.aborted) {
+    cancelarBusca();
+  } else {
+    signal?.addEventListener("abort", cancelarBusca, { once: true });
+  }
 
   async function worker() {
     while (!encontrado && !erroFatal) {
-      if (signal?.aborted) {
+      if (controller.signal.aborted) {
         break;
       }
 
@@ -217,14 +225,16 @@ async function consultarComConcorrenciaLimitada(numeroProcesso, aliases, limite,
       const alias = aliases[posicao];
 
       try {
-        const resultado = await consultarAlias(numeroProcesso, alias, signal);
+        const resultado = await consultarAlias(numeroProcesso, alias, controller.signal);
 
         if (resultado && !encontrado) {
           encontrado = resultado;
+          cancelarBusca();
         }
       } catch (error) {
         if (error instanceof HttpError) {
           erroFatal = error;
+          cancelarBusca();
           break;
         }
 
@@ -232,13 +242,19 @@ async function consultarComConcorrenciaLimitada(numeroProcesso, aliases, limite,
 
         if (status === 401 || status === 403) {
           erroFatal = error;
+          cancelarBusca();
         }
       }
     }
   }
 
   const quantidadeWorkers = Math.max(1, Math.min(limite, aliases.length));
-  await Promise.all(Array.from({ length: quantidadeWorkers }, () => worker()));
+
+  try {
+    await Promise.all(Array.from({ length: quantidadeWorkers }, () => worker()));
+  } finally {
+    signal?.removeEventListener("abort", cancelarBusca);
+  }
 
   if (erroFatal) {
     throw erroFatal;

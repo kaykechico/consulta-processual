@@ -3,8 +3,10 @@ function contarMojibake(texto) {
   return matches ? matches.length : 0;
 }
 
+let mapaSeguro;
+
 function aplicarMapaSeguro(texto) {
-  const mapa = [
+  const mapa = (mapaSeguro ||= [
     ["Ã¡", "á"],
     ["Ã ", "à"],
     ["Ã¢", "â"],
@@ -66,7 +68,7 @@ function aplicarMapaSeguro(texto) {
     ["â€œ", "“"],
     ["â€�", "”"],
     ["â€¦", "…"]
-  ];
+  ]);
 
   return mapa.reduce((resultado, [errado, correto]) => {
     return resultado.replaceAll(errado, correto);
@@ -112,9 +114,13 @@ export function normalizarObjeto(value) {
   }
 
   if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, normalizarObjeto(item)])
-    );
+    const resultado = {};
+
+    for (const [key, item] of Object.entries(value)) {
+      resultado[key] = normalizarObjeto(item);
+    }
+
+    return resultado;
   }
 
   return value;

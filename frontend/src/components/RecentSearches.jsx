@@ -1,5 +1,12 @@
 import { Clock3, Search, Trash2, X } from "lucide-react";
 
+const formatadorData = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit"
+});
+
 function formatarData(value) {
   if (!value) {
     return "";
@@ -11,12 +18,7 @@ function formatarData(value) {
     return "";
   }
 
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(date);
+  return formatadorData.format(date);
 }
 
 export default function RecentSearches({ items, onSelect, onRemove, onClear }) {

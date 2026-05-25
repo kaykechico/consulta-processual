@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Database, RotateCcw, ShieldCheck } from "lucide-react";
 import { consultarProcesso, verificarConexaoApi } from "./api/processos.api";
 import SearchForm from "./components/SearchForm";
-import ProcessSummary from "./components/ProcessSummary";
-import MovementsTimeline from "./components/MovementsTimeline";
 import RecentSearches from "./components/RecentSearches";
 import ErrorState from "./components/ErrorState";
 import LoadingState from "./components/LoadingState";
@@ -14,6 +12,9 @@ import {
   saveRecentSearch
 } from "./utils/recentSearches";
 import { traduzirValor } from "./utils/processo";
+
+const ProcessSummary = lazy(() => import("./components/ProcessSummary"));
+const MovementsTimeline = lazy(() => import("./components/MovementsTimeline"));
 
 export default function App() {
   const [resultado, setResultado] = useState(null);
@@ -208,26 +209,28 @@ export default function App() {
           )}
 
           {!loading && resultado?.success && (
-            <div className="space-y-3 sm:space-y-4">
-              <div className="surface-muted rounded-2xl p-3.5 sm:p-4">
-                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                  <div className="inline-flex items-center gap-2 text-xs font-medium text-zinc-400">
-                    <ShieldCheck size={14} className="shrink-0" />
-                    Fonte oficial: DataJud/CNJ
-                  </div>
-
-                  {resultado.buscaAmpla && (
-                    <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[11px] font-medium text-zinc-400">
-                      <RotateCcw size={12} className="shrink-0" />
-                      Pesquisa ampliada realizada
+            <Suspense fallback={<LoadingState />}>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="surface-muted rounded-2xl p-3.5 sm:p-4">
+                  <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <div className="inline-flex items-center gap-2 text-xs font-medium text-zinc-400">
+                      <ShieldCheck size={14} className="shrink-0" />
+                      Fonte oficial: DataJud/CNJ
                     </div>
-                  )}
-                </div>
-              </div>
 
-              <ProcessSummary resultado={resultado} />
-              <MovementsTimeline resultado={resultado} />
-            </div>
+                    {resultado.buscaAmpla && (
+                      <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[11px] font-medium text-zinc-400">
+                        <RotateCcw size={12} className="shrink-0" />
+                        Pesquisa ampliada realizada
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <ProcessSummary resultado={resultado} />
+                <MovementsTimeline resultado={resultado} />
+              </div>
+            </Suspense>
           )}
         </section>
       )}
