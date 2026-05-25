@@ -43,7 +43,7 @@ Endereços locais:
 
 ## Configuração
 
-O backend precisa de uma chave válida do DataJud em `backend/.env`:
+O backend precisa de uma chave válida do DataJud em `backend/.env`
 
 Configurações úteis já presentes no projeto:
 
