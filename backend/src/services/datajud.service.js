@@ -2,12 +2,13 @@ import axios from "axios";
 import https from "node:https";
 import { listarAliasesDataJud } from "./cnj.service.js";
 import { HttpError } from "../utils/http-error.js";
+import { parseBooleanEnv, parseIntegerEnv } from "../utils/env.js";
 import { normalizarObjeto } from "../utils/text-normalizer.js";
 
 const baseURL = process.env.DATAJUD_BASE_URL || "https://api-publica.datajud.cnj.jus.br/";
-const timeout = Number(process.env.DATAJUD_TIMEOUT_MS || 25000);
-const maxRetries = Number(process.env.DATAJUD_MAX_RETRIES || 2);
-const retryBaseDelayMs = Number(process.env.DATAJUD_RETRY_BASE_DELAY_MS || 600);
+const timeout = parseIntegerEnv(process.env.DATAJUD_TIMEOUT_MS, 25000, { min: 1000, max: 120000 });
+const maxRetries = parseIntegerEnv(process.env.DATAJUD_MAX_RETRIES, 2, { min: 0, max: 5 });
+const retryBaseDelayMs = parseIntegerEnv(process.env.DATAJUD_RETRY_BASE_DELAY_MS, 600, { min: 50, max: 10000 });
 
 const httpsAgent = new https.Agent({
   keepAlive: true,
@@ -74,6 +75,29 @@ function isTransientError(error) {
   const code = error?.code;
 
   if ([408, 425, 429, 500, 502, 503, 504].includes(status)) {
+    return true;
+  }
+
+  return [
+    "ECONNRESET",
+    "ECONNABORTED",
+    "ETIMEDOUT",
+    "EAI_AGAIN",
+    "ENOTFOUND",
+    "ECONNREFUSED",
+    "ERR_SOCKET_CLOSED"
+  ].includes(code);
+}
+
+function isOperationalFallbackError(error) {
+  const status = error?.response?.status;
+  const code = error?.code;
+
+  if (status === 404) {
+    return false;
+  }
+
+  if ([408, 425, 429].includes(status) || status >= 500) {
     return true;
   }
 
@@ -200,6 +224,7 @@ async function consultarComConcorrenciaLimitada(numeroProcesso, aliases, limite,
   let indice = 0;
   let encontrado = null;
   let erroFatal = null;
+  let erroOperacional = null;
   const controller = new AbortController();
   const cancelarBusca = () => controller.abort();
 
@@ -243,6 +268,11 @@ async function consultarComConcorrenciaLimitada(numeroProcesso, aliases, limite,
         if (status === 401 || status === 403) {
           erroFatal = error;
           cancelarBusca();
+          break;
+        }
+
+        if (isOperationalFallbackError(error) && !erroOperacional) {
+          erroOperacional = error;
         }
       }
     }
@@ -258,6 +288,10 @@ async function consultarComConcorrenciaLimitada(numeroProcesso, aliases, limite,
 
   if (erroFatal) {
     throw erroFatal;
+  }
+
+  if (!encontrado && erroOperacional) {
+    throw erroOperacional;
   }
 
   return encontrado;
@@ -359,8 +393,7 @@ export async function consultarProcessoDataJud(numeroProcesso, tribunalDetectado
       }
     }
 
-    const fallbackAtivo =
-      String(process.env.DATAJUD_ENABLE_FALLBACK || "true").toLowerCase() === "true";
+    const fallbackAtivo = parseBooleanEnv(process.env.DATAJUD_ENABLE_FALLBACK, true);
 
     if (!fallbackAtivo) {
       return null;
@@ -371,7 +404,7 @@ export async function consultarProcessoDataJud(numeroProcesso, tribunalDetectado
     const resultadoFallback = await consultarComConcorrenciaLimitada(
       numeroProcesso,
       aliases,
-      Number(process.env.DATAJUD_FALLBACK_CONCURRENCY || 2),
+      parseIntegerEnv(process.env.DATAJUD_FALLBACK_CONCURRENCY, 2, { min: 1, max: 10 }),
       signal
     );
 

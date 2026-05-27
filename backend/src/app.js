@@ -6,6 +6,7 @@ import compression from "compression";
 import rateLimit from "express-rate-limit";
 import processosRoutes from "./routes/processos.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
+import { parseIntegerEnv, parseTrustProxyEnv } from "./utils/env.js";
 
 const app = express();
 
@@ -14,7 +15,7 @@ const corsOrigin = process.env.CORS_ORIGIN
   : ["http://localhost:5173"];
 
 app.disable("x-powered-by");
-app.set("trust proxy", 1);
+app.set("trust proxy", parseTrustProxyEnv(process.env.TRUST_PROXY));
 
 app.use(
   helmet({
@@ -43,8 +44,8 @@ app.get("/health", (req, res) => {
 });
 
 const apiRateLimit = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60000),
-  max: Number(process.env.RATE_LIMIT_MAX || 60),
+  windowMs: parseIntegerEnv(process.env.RATE_LIMIT_WINDOW_MS, 60000, { min: 1000, max: 3600000 }),
+  max: parseIntegerEnv(process.env.RATE_LIMIT_MAX, 60, { min: 1, max: 10000 }),
   standardHeaders: true,
   legacyHeaders: false,
   message: {

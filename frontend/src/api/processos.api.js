@@ -1,8 +1,10 @@
 import axios from "axios";
+import { parseIntegerEnv } from "../utils/env.js";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
-const REQUEST_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS || 90000);
-const MAX_RETRIES = Number(import.meta.env.VITE_API_MAX_RETRIES || 1);
+const viteEnv = import.meta.env || {};
+const API_BASE_URL = viteEnv.VITE_API_URL || "";
+const REQUEST_TIMEOUT_MS = parseIntegerEnv(viteEnv.VITE_API_TIMEOUT_MS, 90000, { min: 1000, max: 300000 });
+const MAX_RETRIES = parseIntegerEnv(viteEnv.VITE_API_MAX_RETRIES, 1, { min: 0, max: 5 });
 
 const api = axios.create({
   baseURL: API_BASE_URL,

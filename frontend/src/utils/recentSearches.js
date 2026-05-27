@@ -37,7 +37,11 @@ export function saveRecentSearch(search) {
     ...filtered
   ].slice(0, MAX_ITEMS);
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    return next;
+  }
 
   return next;
 }
@@ -46,12 +50,20 @@ export function removeRecentSearch(numeroLimpo) {
   const current = getRecentSearches();
   const next = current.filter((item) => item.numeroLimpo !== numeroLimpo);
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    return next;
+  }
 
   return next;
 }
 
 export function clearRecentSearches() {
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    return [];
+  }
   return [];
 }
