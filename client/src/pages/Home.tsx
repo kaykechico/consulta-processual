@@ -29,6 +29,7 @@ export default function Home() {
   }, [estado, ultimaBusca, adicionar]);
 
   const naTelaInicial = estado.tipo === "idle";
+  const mostrarVoltar = estado.tipo === "sucesso" || estado.tipo === "erro";
 
   return (
     <main className={styles.main}>
@@ -76,7 +77,7 @@ export default function Home() {
         </section>
       )}
 
-      {!naTelaInicial && (
+      {mostrarVoltar && (
         <button className={styles.voltar} onClick={reset}>
           ← Voltar
         </button>

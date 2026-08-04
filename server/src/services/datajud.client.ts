@@ -9,27 +9,39 @@ export interface DataJudClienteOptions {
   timeoutMs: number;
 }
 
+const RETRY_DELAY_MS = 800;
+
 export class DataJudCliente {
   constructor(private readonly opts: DataJudClienteOptions) {}
 
   async buscarProcesso(sigla: string, numero: string): Promise<Json | null> {
     const url = `${this.opts.baseUrl}/api_publica_${sigla}/_search`;
     try {
-      const { data } = await axios.post(
-        url,
-        { query: { match: { numeroProcesso: numero } } },
-        {
-          headers: {
-            Authorization: `APIKey ${this.opts.token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: this.opts.timeoutMs,
-        }
-      );
-      return data?.hits?.hits?.[0]?._source ?? null;
+      let source: Json | null = null;
+      for (let tentativa = 0; tentativa < 2; tentativa++) {
+        const { data } = await this.buscar(url, numero);
+        source = data?.hits?.hits?.[0]?._source ?? null;
+        if (source) return source;
+        if (tentativa === 0) await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+      }
+      return null;
     } catch (err) {
       throw this.mapearErro(err, sigla);
     }
+  }
+
+  private buscar(url: string, numero: string) {
+    return axios.post(
+      url,
+      { query: { match: { numeroProcesso: numero } } },
+      {
+        headers: {
+          Authorization: `APIKey ${this.opts.token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: this.opts.timeoutMs,
+      }
+    );
   }
 
   private mapearErro(err: unknown, sigla: string): ApiError {

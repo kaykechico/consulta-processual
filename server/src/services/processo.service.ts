@@ -194,7 +194,7 @@ export class ProcessoService {
 
     const bruto = await this.cliente.buscarProcesso(sigla, numero);
     const valor = bruto ? normalizarProcesso(bruto, numero) : null;
-    this.cache.set(numero, { criadoEm: agora, valor });
+    if (valor) this.cache.set(numero, { criadoEm: agora, valor });
     return valor;
   }
 }
