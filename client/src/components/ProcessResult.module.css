@@ -1,0 +1,269 @@
+.card {
+  background: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 35%);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: #262626;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 32px 40px 28px;
+  border-bottom: 1px solid #1f1f1f;
+  background: #131313;
+}
+
+.numero {
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--text-3);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-2);
+  background: #171717;
+  border: 1px solid #282828;
+  border-radius: 999px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.secao {
+  padding: 28px 40px;
+  border-bottom: 1px solid #1f1f1f;
+  animation: rise 0.25s ease both;
+  animation-fill-mode: both;
+}
+
+.secao:last-child {
+  border-bottom: none;
+}
+
+.secaoTitulo {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  margin-bottom: 20px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 18px 28px;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rotulo {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.valor {
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.chip {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-2);
+  background: #151515;
+  border: 1px solid #242424;
+  border-radius: 999px;
+  padding: 6px 13px;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.chip:hover {
+  border-color: #343434;
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.parte {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  background: #171717;
+  border: 1px solid #212121;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.parte:hover {
+  border-color: #2e2e2e;
+  background: #1a1a1a;
+  transform: translateY(-1px);
+}
+
+.parteLinha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.parteNome {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.parteTipo {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.parteDoc {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.parteDetalhe {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+.timeline {
+  list-style: none;
+  position: relative;
+  padding-left: 22px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--border-strong) 4%,
+    var(--border-strong) 96%,
+    transparent
+  );
+}
+
+.movimento {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0 10px 14px;
+  transition: transform 0.2s ease;
+}
+
+.movimento::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 16px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--text-3);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.movimento:hover {
+  transform: translateX(2px);
+}
+
+.movimento:hover::before {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.movimentoData {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.movimentoNome {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.movimentoComplemento {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+@media (max-width: 640px) {
+  .cabecalho,
+  .secao {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
