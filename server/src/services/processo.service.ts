@@ -1,63 +1,14 @@
 import { ApiError } from "../utils/errors";
-import { formatarCNJ, validarCNJ } from "../utils/cnj";
-import { siglaDataJud } from "../utils/tribunal";
+import { LruCache } from "../lib/cache";
+import { RequestCoalescer } from "../lib/coalescer";
 import { env } from "../config/env";
-import { DataJudCliente } from "./datajud.client";
-
-type Json = Record<string, any>;
-
-export interface NomeCodigoDTO {
-  codigo?: number;
-  nome: string;
-}
-
-export interface OrgaoJulgadorDTO {
-  codigo?: number;
-  nome: string;
-  codigoMunicipioIBGE?: number;
-}
-
-export interface ParteDTO {
-  nome: string;
-  tipoParte?: string;
-  tipoPessoa?: string;
-  documento?: string;
-  isMinisterioPublico: boolean;
-  advogados?: { nome: string; numeroOAB?: string }[];
-  representantes?: { nome: string }[];
-}
-
-export interface MovimentoDTO {
-  dataHora?: string;
-  nome: string;
-  complementos?: string[];
-}
-
-export interface DataRelevanteDTO {
-  rotulo: string;
-  valor: string;
-}
-
-export interface ProcessoDTO {
-  numeroProcesso: string;
-  tribunal: string;
-  grau?: string;
-  instancia?: string;
-  situacao?: string;
-  valorCausa?: number;
-  dataAjuizamento?: string;
-  dataHoraUltimaAtualizacao?: string;
-  classe?: NomeCodigoDTO;
-  assuntos?: NomeCodigoDTO[];
-  orgaoJulgador?: OrgaoJulgadorDTO;
-  competencia?: string;
-  sistema?: NomeCodigoDTO;
-  formato?: NomeCodigoDTO;
-  nivelSigilo?: number;
-  partes?: ParteDTO[];
-  movimentos?: MovimentoDTO[];
-  datasRelevantes?: DataRelevanteDTO[];
-}
+import { DataJudClient } from "./datajud.client";
+import type { DataJudProcessoRaw } from "./datajud.schemas";
+import { normalizeCNJ, validateCNJ, formatCNJ } from "../../../shared/src/cnj.js";
+import { getTribunalFromCNJ, type Tribunal } from "../../../shared/src/tribunais.js";
+import { parseDataJudDate } from "../../../shared/src/dates.js";
+import { classificarMovimento } from "../../../shared/src/movimentos.js";
+import { ProcessoSchema, API_ERROR_CODES, type Processo } from "../../../shared/src/schemas.js";
 
 const GRAUS: Record<string, string> = {
   G1: "1º Grau",
@@ -66,144 +17,170 @@ const GRAUS: Record<string, string> = {
   TR: "Tribunal",
 };
 
-function nomeCodigo(obj: Json | undefined): NomeCodigoDTO | undefined {
-  if (!obj || typeof obj.nome !== "string") return undefined;
-  return { codigo: obj.codigo, nome: obj.nome };
+export interface ProcessoServiceOptions {
+  ttlMs: number;
+  negativeTtlMs: number;
+  maxEntries: number;
 }
 
-function normalizarParte(p: Json): ParteDTO {
-  const advogados = (p.advogados ?? [])
-    .map((a: Json) => ({ nome: a.nome, numeroOAB: a.numeroOAB }))
-    .filter((a: { nome: string }) => a.nome);
-  const representantes = (p.representantes ?? [])
-    .map((r: Json) => ({ nome: r.nome }))
-    .filter((r: { nome: string }) => r.nome);
-  const tipoParte = p.tipoParte;
-  const nome = p.nome;
-  const isMinisterioPublico = /minist|^mp\b/i.test(`${tipoParte ?? ""} ${nome ?? ""}`);
-  return {
-    nome: nome ?? "Parte não identificada",
-    tipoParte,
-    tipoPessoa: p.tipoPessoa,
-    documento: p.documento,
-    isMinisterioPublico,
-    advogados,
-    representantes,
-  };
-}
+export class ProcessoService {
+  private readonly cache: LruCache<string, Processo | null>;
+  private readonly coalescer = new RequestCoalescer<string, Processo | null>();
 
-const RE_DATAJUD_COMPACTA = /^(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?$/;
-
-function normalizarData(v: unknown): string | undefined {
-  if (typeof v !== "string" || !v) return undefined;
-  const m = v.match(RE_DATAJUD_COMPACTA);
-  if (m) {
-    const [, ano, mes, dia, hora, min, seg] = m;
-    return `${ano}-${mes}-${dia}T${hora ?? "00"}:${min ?? "00"}:${seg ?? "00"}.000Z`;
+  constructor(
+    private readonly cliente: DataJudClient,
+    private readonly opts: ProcessoServiceOptions
+  ) {
+    this.cache = new LruCache(opts.maxEntries);
   }
-  return v;
-}
 
-function normalizarMovimento(m: Json): MovimentoDTO {
-  return {
-    dataHora: normalizarData(m.dataHora),
-    nome: m.nome,
-    complementos: (m.complementosTabelados ?? [])
-      .map((c: Json) => c.nome)
-      .filter((c: string) => c),
-  };
-}
+  async buscar(input: string): Promise<Processo | null> {
+    const numero = normalizeCNJ(input);
+    if (!validateCNJ(numero)) {
+      throw new ApiError(
+        422,
+        API_ERROR_CODES.CNJ_INVALIDO,
+        "Número de CNJ inválido. Verifique e tente novamente."
+      );
+    }
 
-function normalizarProcesso(bruto: Json, numero: string): ProcessoDTO {
-  const movimentos: MovimentoDTO[] = (bruto.movimentos ?? [])
-    .map(normalizarMovimento)
-    .filter((m: MovimentoDTO) => m.nome || m.dataHora);
-  const comData = movimentos
-    .filter((m) => m.dataHora)
-    .sort(
-      (a, b) => new Date(b.dataHora as string).getTime() - new Date(a.dataHora as string).getTime()
+    const tribunal = getTribunalFromCNJ(numero);
+    if (!tribunal) {
+      throw new ApiError(
+        422,
+        API_ERROR_CODES.TRIBUNAL_NAO_SUPORTADO,
+        "O tribunal deste número CNJ não é suportado pelo serviço de dados processuais."
+      );
+    }
+
+    const hit = this.cache.get(numero);
+    if (hit !== undefined) {
+      return hit;
+    }
+
+    const resultado = await this.coalescer.run(numero, () =>
+      this.consultarDataJud(numero, tribunal)
     );
-  const semData = movimentos.filter((m) => !m.dataHora);
-
-  const grau = bruto.grau;
-  const datasRelevantes: DataRelevanteDTO[] = [];
-  const ajuizamento = normalizarData(bruto.dataAjuizamento);
-  if (ajuizamento) datasRelevantes.push({ rotulo: "Ajuizamento", valor: ajuizamento });
-  const atualizacao = normalizarData(bruto.dataHoraUltimaAtualizacao);
-  if (atualizacao) {
-    datasRelevantes.push({ rotulo: "Última atualização", valor: atualizacao });
+    this.cache.set(numero, resultado, resultado ? this.opts.ttlMs : this.opts.negativeTtlMs);
+    return resultado;
   }
+
+  private async consultarDataJud(numero: string, tribunal: Tribunal): Promise<Processo | null> {
+    const bruto = await this.cliente.buscarProcesso(tribunal.alias, numero);
+    if (!bruto) return null;
+    return normalizarProcesso(bruto, numero, tribunal);
+  }
+}
+
+function normalizarProcesso(
+  bruto: DataJudProcessoRaw,
+  numero: string,
+  tribunal: Tribunal
+): Processo {
+  const movimentos = (bruto.movimentos ?? [])
+    .map((m) => ({
+      codigo: m.codigo ?? undefined,
+      nome: m.nome ?? "",
+      dataHora: parseDataJudDate(m.dataHora),
+      complementos: (m.complementosTabelados ?? []).map((c) => c.nome ?? "").filter((nome) => nome),
+    }))
+    .filter((m) => m.nome || m.dataHora);
+
+  const ordenados = [...movimentos].sort((a, b) => {
+    const ta = a.dataHora ? Date.parse(a.dataHora) : -Infinity;
+    const tb = b.dataHora ? Date.parse(b.dataHora) : -Infinity;
+    return tb - ta;
+  });
+
+  const primeira = ordenados[0];
+  const ultimaMovimentacao = primeira
+    ? {
+        nome: primeira.nome,
+        dataHora: primeira.dataHora,
+        codigo: primeira.codigo,
+        categoria: classificarMovimento(primeira),
+      }
+    : undefined;
+
+  const grau = bruto.grau ?? undefined;
+  const datasRelevantes: { rotulo: string; valor: string }[] = [];
+  const ajuizamento = parseDataJudDate(bruto.dataAjuizamento);
+  if (ajuizamento) datasRelevantes.push({ rotulo: "Ajuizamento", valor: ajuizamento });
+  const atualizacao = parseDataJudDate(bruto.dataHoraUltimaAtualizacao);
+  if (atualizacao) datasRelevantes.push({ rotulo: "Última atualização", valor: atualizacao });
 
   const valorBruto = bruto.valorCausa ?? bruto.valor;
   const valorCausa = Number.isFinite(Number(valorBruto)) ? Number(valorBruto) : undefined;
 
-  return {
-    numeroProcesso: formatarCNJ(bruto.numeroProcesso ?? numero),
-    tribunal: bruto.tribunal ?? "",
+  const partes = (bruto.partes ?? []).map((p) => {
+    const nome = p.nome ?? "Parte não identificada";
+    const tipoParte = p.tipoParte ?? undefined;
+    return {
+      nome,
+      tipoParte,
+      tipoPessoa: p.tipoPessoa ?? undefined,
+      isMinisterioPublico: /minist|^mp\b/i.test(`${tipoParte ?? ""} ${nome}`),
+      advogados: (p.advogados ?? [])
+        .map((a) => ({ nome: a.nome ?? "", numeroOAB: a.numeroOAB ?? undefined }))
+        .filter((a) => a.nome),
+      representantes: (p.representantes ?? [])
+        .map((r) => ({ nome: r.nome ?? "" }))
+        .filter((r) => r.nome),
+    };
+  });
+
+  const assuntos = (bruto.assuntos ?? [])
+    .filter((a) => a.nome)
+    .map((a) => ({ codigo: a.codigo ?? undefined, nome: a.nome }));
+
+  const processo: Processo = {
+    numeroProcesso: formatCNJ(numero),
+    tribunal: bruto.tribunal ?? tribunal.nome,
     grau,
-    instancia: grau ? GRAUS[grau] ?? grau : undefined,
-    situacao: comData[0]?.nome,
+    instancia: grau ? (GRAUS[grau] ?? grau) : undefined,
+    ultimaMovimentacao,
     valorCausa,
     dataAjuizamento: ajuizamento,
     dataHoraUltimaAtualizacao: atualizacao,
-    classe: nomeCodigo(bruto.classe),
-    assuntos: (bruto.assuntos ?? [])
-      .map(nomeCodigo)
-      .filter((a: NomeCodigoDTO | undefined) => a) as NomeCodigoDTO[],
+    classe: bruto.classe?.nome
+      ? { codigo: bruto.classe.codigo ?? undefined, nome: bruto.classe.nome }
+      : undefined,
+    assuntos,
     orgaoJulgador: bruto.orgaoJulgador?.nome
       ? {
-          codigo: bruto.orgaoJulgador.codigo,
+          codigo: bruto.orgaoJulgador.codigo ?? undefined,
           nome: bruto.orgaoJulgador.nome,
-          codigoMunicipioIBGE: bruto.orgaoJulgador.codigoMunicipioIBGE,
+          codigoMunicipioIBGE: bruto.orgaoJulgador.codigoMunicipioIBGE ?? undefined,
         }
       : undefined,
-    competencia: bruto.competencia?.nome ?? bruto.competencia,
-    sistema: nomeCodigo(bruto.sistema),
-    formato: nomeCodigo(bruto.formato),
-    nivelSigilo: bruto.nivelSigilo,
-    partes: (bruto.partes ?? []).map(normalizarParte),
-    movimentos: [...comData, ...semData],
+    competencia:
+      typeof bruto.competencia === "string" ? bruto.competencia : bruto.competencia?.nome,
+    sistema: bruto.sistema?.nome
+      ? { codigo: bruto.sistema.codigo ?? undefined, nome: bruto.sistema.nome }
+      : undefined,
+    formato: bruto.formato?.nome
+      ? { codigo: bruto.formato.codigo ?? undefined, nome: bruto.formato.nome }
+      : undefined,
+    nivelSigilo: bruto.nivelSigilo ?? undefined,
+    partes,
+    movimentos: ordenados,
     datasRelevantes,
   };
-}
 
-export class ProcessoService {
-  private readonly cache = new Map<string, { criadoEm: number; valor: ProcessoDTO | null }>();
-
-  constructor(
-    private readonly cliente: DataJudCliente,
-    private readonly ttlMs: number
-  ) {}
-
-  async buscar(numero: string): Promise<ProcessoDTO | null> {
-    if (!validarCNJ(numero)) {
-      throw new ApiError(422, "CNJ_INVALIDO", "Número de CNJ inválido. Verifique e tente novamente.");
-    }
-    const sigla = siglaDataJud(numero);
-    if (!sigla) {
-      throw new ApiError(
-        422,
-        "TRIBUNAL_NAO_SUPORTADO",
-        "O tribunal deste número CNJ não é suportado pela API do DataJud."
-      );
-    }
-
-    const agora = Date.now();
-    const hit = this.cache.get(numero);
-    if (hit && agora - hit.criadoEm < this.ttlMs) return hit.valor;
-
-    const bruto = await this.cliente.buscarProcesso(sigla, numero);
-    const valor = bruto ? normalizarProcesso(bruto, numero) : null;
-    if (valor) this.cache.set(numero, { criadoEm: agora, valor });
-    return valor;
-  }
+  return ProcessoSchema.parse(processo);
 }
 
 export const processoService = new ProcessoService(
-  new DataJudCliente({
+  new DataJudClient({
     baseUrl: env.DATAJUD_BASE_URL,
     token: env.DATAJUD_TOKEN,
     timeoutMs: env.DATAJUD_TIMEOUT_MS,
+    maxRetries: env.DATAJUD_MAX_RETRIES,
+    retryBaseMs: env.DATAJUD_RETRY_BASE_MS,
   }),
-  env.CACHE_TTL_SECONDS * 1000
+  {
+    ttlMs: env.CACHE_TTL_SECONDS * 1000,
+    negativeTtlMs: env.CACHE_NEGATIVE_TTL_SECONDS * 1000,
+    maxEntries: env.CACHE_MAX_ENTRIES,
+  }
 );

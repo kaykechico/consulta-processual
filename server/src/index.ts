@@ -1,21 +1,37 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import { env, corsOrigins } from "./config/env";
-import { processoRouter } from "./routes/processo.routes";
-import { errorHandler, notFound } from "./middlewares/error";
+import { app, rateLimiter } from "./app";
+import { env, isProduction } from "./config/env";
+import { logger } from "./lib/logger";
 
-const app = express();
-
-app.use(helmet());
-app.use(cors({ origin: corsOrigins }));
-app.use(express.json());
-
-app.use("/api", processoRouter);
-
-app.use(notFound);
-app.use(errorHandler);
-
-app.listen(env.PORT, () => {
-  console.log(`API Consulta Processual em http://localhost:${env.PORT}`);
+const server = app.listen(env.PORT, () => {
+  logger.info(
+    { port: env.PORT, ambiente: env.NODE_ENV, producao: isProduction },
+    "API Consulta Processual iniciada"
+  );
 });
+
+let encerrando = false;
+
+function shutdown(signal: string): void {
+  if (encerrando) return;
+  encerrando = true;
+  logger.info({ signal }, "recebido sinal de encerramento; parando de aceitar requisições");
+
+  const forcar = setTimeout(() => {
+    logger.error("encerramento forçado após timeout");
+    process.exit(1);
+  }, 10_000);
+  forcar.unref();
+
+  server.close((err) => {
+    rateLimiter.dispose();
+    if (err) {
+      logger.error({ err }, "erro ao fechar o servidor");
+      process.exit(1);
+    }
+    logger.info("servidor encerrado com sucesso");
+    process.exit(0);
+  });
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import type { MovimentoDTO, ProcessoDTO } from "../types/processo";
+import type { Movimento, Processo } from "../../../shared/src/schemas";
+import { ROTULO_CATEGORIA, classificarMovimento } from "../../../shared/src/movimentos";
+import type { CategoriaMovimento } from "../../../shared/src/movimentos";
 import styles from "./ProcessResult.module.css";
 
 const formatoData = new Intl.DateTimeFormat("pt-BR", {
@@ -24,23 +26,16 @@ function formatarData(valor?: string): string {
   return formatoData.format(data);
 }
 
-const RE_AUDIENCIA = /audi|julgamento|senten|decis/i;
-const RE_DOCUMENTO = /documento|certid|expedi|intima|public/i;
-const RE_RECURSO = /recurso|apela|embarg|agravo|revis/i;
-
-function grupoMovimento(nome: string): "audiencias" | "documentos" | "recursos" | "outros" {
-  if (RE_RECURSO.test(nome)) return "recursos";
-  if (RE_AUDIENCIA.test(nome)) return "audiencias";
-  if (RE_DOCUMENTO.test(nome)) return "documentos";
-  return "outros";
-}
-
-const GRUPOS = [
-  { chave: "audiencias", titulo: "Audiências e Julgamentos" },
-  { chave: "documentos", titulo: "Documentos" },
-  { chave: "recursos", titulo: "Recursos" },
-  { chave: "outros", titulo: "Movimentações" },
-] as const;
+const ORDEM_CATEGORIAS: CategoriaMovimento[] = [
+  "AUDIENCIA",
+  "SENTENCA",
+  "DECISAO",
+  "RECURSO",
+  "DOCUMENTO",
+  "INTIMACAO",
+  "DISTRIBUICAO",
+  "OUTROS",
+];
 
 interface ItemProps {
   rotulo: string;
@@ -57,7 +52,7 @@ function Item({ rotulo, valor }: ItemProps) {
   );
 }
 
-function Timeline({ movimentos }: { movimentos: MovimentoDTO[] }) {
+function Timeline({ movimentos }: { movimentos: Movimento[] }) {
   return (
     <ol className={styles.timeline}>
       {movimentos.map((m, i) => (
@@ -65,9 +60,7 @@ function Timeline({ movimentos }: { movimentos: MovimentoDTO[] }) {
           <span className={styles.movimentoData}>{formatarData(m.dataHora)}</span>
           <span className={styles.movimentoNome}>{m.nome}</span>
           {m.complementos.length > 0 && (
-            <span className={styles.movimentoComplemento}>
-              {m.complementos.join(" · ")}
-            </span>
+            <span className={styles.movimentoComplemento}>{m.complementos.join(" · ")}</span>
           )}
         </li>
       ))}
@@ -83,25 +76,25 @@ interface SecaoProps {
 
 function Secao({ titulo, children, delay = 0 }: SecaoProps) {
   return (
-    <section
-      className={styles.secao}
-      aria-label={titulo}
-      style={{ animationDelay: `${delay}ms` }}
-    >
+    <section className={styles.secao} aria-label={titulo} style={{ animationDelay: `${delay}ms` }}>
       <h3 className={styles.secaoTitulo}>{titulo}</h3>
       {children}
     </section>
   );
 }
 
-export default function ProcessResult({ processo }: { processo: ProcessoDTO }) {
+function listaAdvogados(advogados: { nome: string; numeroOAB?: string }[]): string {
+  return advogados.map((a) => (a.numeroOAB ? `${a.nome} (OAB ${a.numeroOAB})` : a.nome)).join(", ");
+}
+
+export default function ProcessResult({ processo }: { processo: Processo }) {
   const ministerios = processo.partes.filter((p) => p.isMinisterioPublico);
   const demaisPartes = processo.partes.filter((p) => !p.isMinisterioPublico);
 
-  const grupos = new Map<string, MovimentoDTO[]>();
-  for (const g of GRUPOS) grupos.set(g.chave, []);
+  const grupos = new Map<CategoriaMovimento, Movimento[]>();
+  for (const categoria of ORDEM_CATEGORIAS) grupos.set(categoria, []);
   for (const m of processo.movimentos) {
-    grupos.get(grupoMovimento(m.nome))!.push(m);
+    grupos.get(classificarMovimento(m))!.push(m);
   }
 
   let indice = 0;
@@ -118,7 +111,9 @@ export default function ProcessResult({ processo }: { processo: ProcessoDTO }) {
               .join(" · ")}
           </p>
         </div>
-        {processo.situacao && <span className={styles.badge}>{processo.situacao}</span>}
+        {processo.ultimaMovimentacao && (
+          <span className={styles.badge}>{processo.ultimaMovimentacao.nome}</span>
+        )}
       </header>
 
       <Secao titulo="Processo" delay={proximoAtraso()}>
@@ -136,7 +131,7 @@ export default function ProcessResult({ processo }: { processo: ProcessoDTO }) {
         {processo.assuntos.length > 0 && (
           <div className={styles.chips}>
             {processo.assuntos.map((a) => (
-              <span key={a.codigo} className={styles.chip}>
+              <span key={a.codigo ?? a.nome} className={styles.chip}>
                 {a.nome}
               </span>
             ))}
@@ -151,17 +146,17 @@ export default function ProcessResult({ processo }: { processo: ProcessoDTO }) {
               <div key={i} className={styles.parte}>
                 <div className={styles.parteLinha}>
                   <span className={styles.parteNome}>{p.nome}</span>
-                  {p.documento && <span className={styles.parteDoc}>{p.documento}</span>}
+                  {p.tipoPessoa && <span className={styles.parteDoc}>{p.tipoPessoa}</span>}
                 </div>
-                {p.tipo && <span className={styles.parteTipo}>{p.tipo}</span>}
+                {p.tipoParte && <span className={styles.parteTipo}>{p.tipoParte}</span>}
                 {p.advogados.length > 0 && (
                   <span className={styles.parteDetalhe}>
-                    Advogados: {p.advogados.join(", ")}
+                    Advogados: {listaAdvogados(p.advogados)}
                   </span>
                 )}
                 {p.representantes.length > 0 && (
                   <span className={styles.parteDetalhe}>
-                    Representantes: {p.representantes.join(", ")}
+                    Representantes: {p.representantes.map((r) => r.nome).join(", ")}
                   </span>
                 )}
               </div>
@@ -176,18 +171,18 @@ export default function ProcessResult({ processo }: { processo: ProcessoDTO }) {
             {ministerios.map((p, i) => (
               <div key={i} className={styles.parte}>
                 <span className={styles.parteNome}>{p.nome}</span>
-                {p.tipo && <span className={styles.parteTipo}>{p.tipo}</span>}
+                {p.tipoParte && <span className={styles.parteTipo}>{p.tipoParte}</span>}
               </div>
             ))}
           </div>
         </Secao>
       )}
 
-      {GRUPOS.map((g) => {
-        const movimentos = grupos.get(g.chave)!;
+      {ORDEM_CATEGORIAS.map((categoria) => {
+        const movimentos = grupos.get(categoria)!;
         if (movimentos.length === 0) return null;
         return (
-          <Secao key={g.chave} titulo={g.titulo} delay={proximoAtraso()}>
+          <Secao key={categoria} titulo={ROTULO_CATEGORIA[categoria]} delay={proximoAtraso()}>
             <Timeline movimentos={movimentos} />
           </Secao>
         );

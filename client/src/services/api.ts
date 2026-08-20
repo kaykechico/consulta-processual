@@ -1,10 +1,10 @@
 import axios from "axios";
-import type { ProcessoDTO } from "../types/processo";
+import type { Processo } from "../../../shared/src/schemas";
 
 export class ProcessoError extends Error {
   constructor(
     public code: string,
-    message: string,
+    message: string
   ) {
     super(message);
     this.name = "ProcessoError";
@@ -16,24 +16,21 @@ const api = axios.create({
   timeout: 30000,
 });
 
-export async function buscarProcesso(numero: string): Promise<ProcessoDTO> {
+export async function buscarProcesso(numero: string, signal?: AbortSignal): Promise<Processo> {
   try {
-    const { data } = await api.get<{ processo: ProcessoDTO | null }>(
-      "/processo",
-      { params: { numero } },
+    const { data } = await api.post<{ processo: Processo }>(
+      "/v1/processos/consulta",
+      { numero },
+      { signal }
     );
-    if (!data.processo) {
-      throw new ProcessoError("NAO_ENCONTRADO", "Processo não encontrado.");
-    }
     return data.processo;
   } catch (error) {
-    if (error instanceof ProcessoError) {
-      throw error;
-    }
     if (axios.isAxiosError(error)) {
+      if (error.code === "ERR_CANCELED") {
+        throw new ProcessoError("CANCELADO", "Consulta cancelada.");
+      }
       const body = error.response?.data as
-        | { error?: { code?: string; message?: string } }
-        | undefined;
+        { error?: { code?: string; message?: string } } | undefined;
       if (body?.error?.message) {
         throw new ProcessoError(body.error.code ?? "ERRO", body.error.message);
       }

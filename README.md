@@ -1,34 +1,33 @@
 # Consulta Processual
 
-Consulta de processos judiciais do CNJ pela API pública do DataJud. Pesquise por número CNJ com validação de dígito verificador, cache em memória e interface minimalista.
+Consulta de processos judiciais pelo número CNJ, usando a API pública do DataJud (CNJ). O frontend é React, o backend é Express e o pacote `shared/` guarda o contrato de dados usado pelos dois lados.
 
 ## Stack
 
-- **Frontend:** React + Vite + TypeScript + Axios + CSS Modules
-- **Backend:** Node.js + Express + TypeScript + Axios + Zod
+- **Frontend:** React 19 + Vite + TypeScript + React Router + Axios + CSS Modules
+- **Backend:** Node.js + Express 5 + TypeScript + Zod + pino
+- **Compartilhado (`shared/`):** validação CNJ (dígito verificador Módulo 97), mapa de tribunais, parsing de datas, schemas Zod do contrato, classificação de movimentos
 - **API:** DataJud (CNJ), `POST /api_publica_{sigla}/_search`
 
 ## Requisitos
 
-- Node.js 20+ e npm
+Node.js 22+ e npm.
 
 ## Como rodar
 
-1. Instale as dependências:
+1. Instale as dependências (raiz, `server/` e `client/`):
 
    ```bash
    npm install
-   npm install --prefix server
-   npm install --prefix client
    ```
 
-2. Crie o arquivo `.env` a partir do exemplo e ajuste se necessário:
+2. Crie o `.env` do backend:
 
    ```bash
    cp server/.env.example server/.env
    ```
 
-   A chave pública do DataJud já vem preenchida no exemplo; troque por outra se quiser (rotacione em `https://datajud-wiki.cnj.jus.br/api-publica/acesso/`).
+   O exemplo já traz a chave pública do DataJud.
 
 3. Suba o ambiente de desenvolvimento:
 
@@ -39,69 +38,44 @@ Consulta de processos judiciais do CNJ pela API pública do DataJud. Pesquise po
    - Frontend: http://localhost:5173 (proxy `/api` para o backend)
    - Backend: http://localhost:3333
 
-## Como testar
-
-```bash
-npm run lint        # ESLint (server + client)
-npm run build       # TypeScript + bundle (server + client)
-npm test --prefix server   # self-check dos utilitários (CNJ, tribunais)
-```
-
-Exemplo de consulta válida (TRF1):
-
-```bash
-curl "http://localhost:3333/api/processo?numero=00008323520184013202"
-```
-
 ## Produção
 
-Esta aplicação roda **apenas localmente** — o backend e a interface são feitos para servirem juntos. Para colocar em produção, rode por exemplo em um único VPS com npm e PM2:
+O build compila `server/dist/` e `client/dist/`. Em produção, o Express serve o frontend de `client/dist` com fallback para o SPA:
 
-1. Instale as dependências e compile:
+```bash
+npm run build
+NODE_ENV=production PORT=3333 node --env-file=server/.env server/dist/server/src/index.js
+```
 
-   ```bash
-   npm install
-   npm install --prefix server --omit=dev
-   npm install --prefix client
-   npm run build
-   ```
+## API
 
-   O build gera `server/dist/` e `client/dist/` (estático).
+| Método | Rota | Descrição |
+| ------ | ---- | --------- |
+| `POST` | `/api/v1/processos/consulta` | Consulta por número CNJ (`{ "numero": "..." }`) |
+| `GET` | `/api/v1/processos/consulta?numero=...` | Consulta por query string |
+| `GET` | `/api/processo?numero=...` | Rota legada (mesma consulta) |
+| `GET` | `/api/v1/health` | Health check (sem rate limit) |
+| `GET` | `/api/v1/ready` | Prontidão (sem rate limit) |
 
-2. Configure o `.env` de produção (`server/.env`) com `DATAJUD_TOKEN` real, `CORS_ORIGIN` apontando para o domínio e ajuste `DATAJUD_TIMEOUT_MS`/`CACHE_TTL_SECONDS`.
+Exemplo de consulta válida (TJ-SP):
 
-3. Inicie ambos com PM2:
+```bash
+curl -X POST "http://localhost:3333/api/v1/processos/consulta" \
+  -H "Content-Type: application/json" \
+  -d '{"numero":"10092161720238260016"}'
+```
 
-   ```bash
-   npm install -g pm2
-   pm2 start "node server/dist/index.js" --name consulta-processual-api
-   pm2 start "npx vite preview --host --port 4173 --outDir client/dist" --name consulta-processual-web
-   pm2 save
-   ```
+Erros seguem o formato `{ "error": { "code", "message", "requestId" } }`. Códigos: `CNJ_INVALIDO`, `TRIBUNAL_NAO_SUPORTADO`, `PROCESSO_NAO_ENCONTRADO`, `DATAJUD_TIMEOUT`, `DATAJUD_RATE_LIMITED`, `DATAJUD_INDISPONIVEL`, `DATAJUD_AUTH`, `DATAJUD_SCHEMA_INVALID`, `RATE_LIMITED`, `NUMERO_OBRIGATORIO`, `ERRO_INTERNO`, `ROTA_NAO_ENCONTRADA`.
 
-   Em `/server`, o Express serve somente a API em `/api`. `client/dist` (ou o Vite preview) serve o frontend e aponta o proxy `/api` para o backend, ou o host pode ser configurado com um proxy reverso como o Nginx para unir os dois em um único domínio.
+O DTO de resposta não inclui documentos nem dados sensíveis das partes. Advogados vêm com nome, tipo e OAB.
 
-4. Opcional: suba com Nginx na frente, configurando `/` para servir `client/dist` e rodando o backend em `:3333` com proxy de `/api` para `http://localhost:3333`.
+## Frontend
 
-## Aspectos jurídicos e privacidade
+Rotas:
 
-Esta ferramenta usa a **API pública de dados abertos do DataJud (CNJ)**, que reúne informações processuais divulgadas por lei. Pontos a considerar:
-
-- **Natureza dos dados**: a API devolve metadados de processos públicos (tribunal, classe, partes, movimentações). Não substitui os sistemas oficiais dos tribunais nem o Diário de Justiça.
-- **Processos sigilosos**: processos com segredo de justiça não aparecem integralmente na API; a normalização só expõe o que o DataJud disponibiliza. O campo `nivelSigilo` é retornado conforme vier.
-- **Uso responsável**: consulte apenas o necessário e não faça scraping em massa ou uso indevido dos dados (veja os termos de uso do CNJ para a API pública).
-- **Privacidade no cliente**: os números consultados são guardados apenas no navegador do usuário (`localStorage`), sem envio a terceiros. Nenhum dado pessoal é armazenado no backend.
-- **Chave de acesso**: o `DATAJUD_TOKEN` fica somente no servidor (`.env`) e nunca é enviado ao frontend. Em produção, esconda o token do histórico do repositório e rotacione quando necessário.
-- **Este projeto é de caráter demonstrativo/informacional e não é um serviço jurídico oficial.** Verifique a informação direto na fonte oficial antes de qualquer decisão.
-
-## Scripts
-
-| Comando | Descrição |
-| ------- | --------- |
-| `npm run dev` | Sobe backend e frontend juntos (concurrently) |
-| `npm run build` | Compila server (tsc) e client (vite) |
-| `npm run lint` | Roda ESLint nos dois projetos |
-| `npm run format` | Formata o código com Prettier |
+- `/` — formulário de busca e consultas recentes (localStorage)
+- `/consulta?numero=NNN` — resultado da consulta, URL compartilhável
+- `/privacidade`, `/termos`, `/aviso` — páginas informativas
 
 ## Configuração
 
@@ -113,14 +87,39 @@ Variáveis do backend (`server/.env`):
 | `DATAJUD_TOKEN` | (obrigatória) | Chave da API pública do DataJud |
 | `DATAJUD_BASE_URL` | `https://api-publica.datajud.cnj.jus.br` | URL base da API |
 | `DATAJUD_TIMEOUT_MS` | `15000` | Timeout das chamadas ao DataJud |
-| `CACHE_TTL_SECONDS` | `300` | TTL do cache em memória dos resultados |
+| `DATAJUD_MAX_RETRIES` | `3` | Tentativas em 429/502/503/504/timeout |
+| `CACHE_TTL_SECONDS` | `300` | TTL do cache em memória |
+| `CACHE_NEGATIVE_TTL_SECONDS` | `60` | TTL do cache de não-encontrados |
+| `CACHE_MAX_ENTRIES` | `200` | Limite de entradas do cache |
+| `RATE_LIMIT_MAX` | `30` | Requisições por janela por IP |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Janela do rate limit |
 | `CORS_ORIGIN` | `http://localhost:5173` | Origens permitidas (vírgula para várias) |
+| `LOG_LEVEL` | `info` | Nível de log do pino |
+| `CLIENT_DIST` | `client/dist` | Caminho do frontend compilado (produção) |
 
-A chave do DataJud vive apenas no backend, nunca é exposta ao frontend.
+O `DATAJUD_TOKEN` vive apenas no backend. O frontend nunca o recebe.
 
-## Funcionalidades
+## Privacidade
 
-- Validação do número CNJ (máscara ou digitado, com dígito verificador Módulo 97)
-- Resultados normalizados: tribunal, classe, assunto, órgão julgador, competência, valor da causa, datas, partes, advogados, movimentações ordenadas por data e mais
-- Cache em memória com TTL configurável
-- Interface com animações em CSS, historico de consultas recentes e estados de carregamento/erro/sem resultado
+A API devolve metadados de processos públicos (tribunal, classe, partes, movimentações). Processos com segredo de justiça não aparecem integralmente; o campo `nivelSigilo` chega como vier.
+
+Você vê o que consultou no seu próprio navegador (localStorage). O backend não guarda dados pessoais. Consulte apenas o necessário e respeite os termos de uso da API pública do CNJ.
+
+Este projeto é demonstrativo e não substitui os sistemas oficiais dos tribunais. Confira qualquer informação na fonte oficial antes de decidir.
+
+## Estrutura
+
+```
+shared/src/          contrato compartilhado (CNJ, tribunais, schemas, movimentos)
+server/src/          API Express (client resiliente, cache, rate limit, logs)
+client/src/          SPA React (consulta, URL compartilhável, recentes)
+```
+
+## Scripts
+
+| Comando | Descrição |
+| ------- | --------- |
+| `npm run dev` | Sobe backend e frontend juntos (concurrently) |
+| `npm run build` | Compila server (tsc) e client (vite) |
+| `npm run lint` | Roda ESLint nos dois projetos |
+| `npm run format` | Formata o código com Prettier |

@@ -183,6 +183,29 @@
   animation: rise 0.25s ease both;
 }
 
+.rodape {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 48px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 0.8rem;
+  color: var(--text-3);
+  animation: rise 0.3s ease 280ms both;
+}
+
+.rodape a {
+  color: var(--text-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.rodape a:hover {
+  color: var(--text);
+}
+
 .voltar:hover {
   color: var(--text);
   border-color: var(--border-strong);

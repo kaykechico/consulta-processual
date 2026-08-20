@@ -1,0 +1,6 @@
+{
+  "name": "@consulta/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Contrato compartilhado entre frontend e backend (schemas Zod, CNJ, tribunais, datas, movimentos)."
+}

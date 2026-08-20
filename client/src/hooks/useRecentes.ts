@@ -27,10 +27,9 @@ export function useRecentes() {
   }, [recentes]);
 
   const adicionar = useCallback((numero: string, rotulo: string) => {
-    setRecentes((prev) => [
-      { numero, rotulo },
-      ...prev.filter((r) => r.numero !== numero),
-    ].slice(0, MAX_RECENTES));
+    setRecentes((prev) =>
+      [{ numero, rotulo }, ...prev.filter((r) => r.numero !== numero)].slice(0, MAX_RECENTES)
+    );
   }, []);
 
   const remover = useCallback((numero: string) => {

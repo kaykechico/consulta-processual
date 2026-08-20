@@ -112,6 +112,13 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 0.7s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
 @media (max-width: 480px) {
   .campo {
     flex-direction: column;

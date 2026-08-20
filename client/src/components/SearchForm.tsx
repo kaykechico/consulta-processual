@@ -7,10 +7,11 @@ import styles from "./SearchForm.module.css";
 interface SearchFormProps {
   onBuscar: (numero: string) => void;
   carregando: boolean;
+  valorInicial?: string;
 }
 
-export default function SearchForm({ onBuscar, carregando }: SearchFormProps) {
-  const [valor, setValor] = useState("");
+export default function SearchForm({ onBuscar, carregando, valorInicial = "" }: SearchFormProps) {
+  const [valor, setValor] = useState(valorInicial);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,9 +34,7 @@ export default function SearchForm({ onBuscar, carregando }: SearchFormProps) {
           autoComplete="off"
           placeholder="Digite o número CNJ, ex.: 0001234-56.2025.8.26.0100"
           value={formatarMascara(valor)}
-          onChange={(event) =>
-            setValor(event.target.value.replace(/\D/g, "").slice(0, 20))
-          }
+          onChange={(event) => setValor(event.target.value.replace(/\D/g, "").slice(0, 20))}
           disabled={carregando}
         />
         <button

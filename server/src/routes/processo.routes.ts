@@ -1,6 +1,11 @@
 import { Router } from "express";
-import { getProcesso } from "../controllers/processo.controller";
+import type { RequestHandler } from "express";
+import { consultarProcesso, healthHandler, readyHandler } from "../controllers/processo.controller";
+import { rateLimitMiddleware } from "../middlewares/rateLimit";
 
-export const processoRouter = Router();
+export const apiRouter = Router();
 
-processoRouter.get("/processo", getProcesso);
+apiRouter.post("/v1/processos/consulta", rateLimitMiddleware as RequestHandler, consultarProcesso);
+apiRouter.get("/v1/processos/consulta", rateLimitMiddleware as RequestHandler, consultarProcesso);
+apiRouter.get("/v1/health", healthHandler);
+apiRouter.get("/v1/ready", readyHandler);
