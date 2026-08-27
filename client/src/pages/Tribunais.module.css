@@ -1,0 +1,244 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  padding-top: calc(var(--space-8) + env(safe-area-inset-top));
+  padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-3);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  width: fit-content;
+  min-height: 44px;
+}
+
+.voltar:hover {
+  color: var(--text);
+}
+
+.titulo {
+  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.subtitulo {
+  font-size: 0.9375rem;
+  color: var(--text-2);
+  max-width: 650px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.buscaWrapper {
+  flex: 1 1 100%;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.buscaIcon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+.buscaInput {
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4) 0 calc(var(--space-4) + 20px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.buscaInput:focus {
+  border-color: var(--accent);
+}
+
+.selectSegmento {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.selectSegmento:focus {
+  border-color: var(--accent);
+}
+
+.listaGrupos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.grupoTitulo {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.grupoContagem {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.gradeTribunais {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.cardCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.aliasBadge {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface-2);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.badgeNaoSuportado {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.cardNome {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.cardMeta {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.linkFonte {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  padding-top: var(--space-2);
+  min-height: 44px;
+}
+
+.linkFonte:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.vazio {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 599px) {
+  .filtros {
+    flex-direction: column;
+  }
+
+  .selectSegmento {
+    width: 100%;
+  }
+
+  .gradeTribunais {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 767px) {
+  .gradeTribunais {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}

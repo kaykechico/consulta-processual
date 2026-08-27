@@ -1,0 +1,122 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) 0;
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top));
+}
+
+.headerInner {
+  width: min(100% - 32px, var(--content-lg));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 44px;
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+  white-space: nowrap;
+}
+
+.voltar:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.headerSearch {
+  flex: 1;
+  min-width: 0;
+  max-width: 480px;
+  margin-left: auto;
+}
+
+.main {
+  width: min(100% - 32px, var(--content-lg));
+  margin-inline: auto;
+  padding: var(--space-6) 0 var(--space-8);
+  padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
+}
+
+.mensagemErro,
+.mensagemVazio {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
+}
+
+.mensagemTitulo {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.mensagemDescricao {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  max-width: 460px;
+  margin: 0 auto var(--space-5);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.botaoTentar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.botaoTentar:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+@media (max-width: 599px) {
+  .headerInner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .voltar {
+    width: fit-content;
+  }
+
+  .headerSearch {
+    max-width: 100%;
+    margin-left: 0;
+  }
+}

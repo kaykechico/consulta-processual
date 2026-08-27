@@ -1,0 +1,727 @@
+.documento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: fadeIn 0.15s ease;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.cabecalhoInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.numeroWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.numero {
+  font-size: clamp(1.35rem, 3.5vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.botaoCopiarNumero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-3);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.botaoCopiarNumero:hover {
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  color: var(--text-3);
+}
+
+.badgeInstancia {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.badgeSigilo {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f87171;
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.botaoPrincipal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.botaoPrincipal:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.botaoMenu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-2);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.botaoMenu:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 30;
+  min-width: 180px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.menuItem:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.menuItemSucesso {
+  color: var(--success);
+}
+
+.destaqueResumo {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.resumoCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.resumoRotulo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: var(--surface-3);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+.resumoEvento {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.resumoData {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.secaoTitulo {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4) var(--space-5);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rotulo {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.valor {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+.listaPartes {
+  display: flex;
+  flex-direction: column;
+}
+
+.parteCard {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parteCard:first-child {
+  padding-top: 0;
+}
+
+.parteCard:last-child {
+  border-bottom: none;
+}
+
+.parteLinha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.parteNome {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.parteTipo {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.parteDoc {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-left: var(--space-2);
+}
+
+.parteDetalhe {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+}
+
+.filtrosTimeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.filtroSelect,
+.filtroInput {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3);
+  height: 44px;
+  min-height: 44px;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: border-color 0.15s ease;
+}
+
+.filtroSelect:focus,
+.filtroInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.filtroInput {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.timeline {
+  list-style: none;
+  position: relative;
+  padding-left: 20px;
+  margin-top: var(--space-2);
+}
+
+.contagemMovimentos {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: var(--space-2);
+}
+
+.carregarMais {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.carregarMais:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--border);
+}
+
+.movimento {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) 0 var(--space-3) var(--space-3);
+}
+
+.movimento::before {
+  content: "";
+  position: absolute;
+  left: -17px;
+  top: 19px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+}
+
+@keyframes pulso {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(138, 180, 255, 0.85);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 0 8px rgba(138, 180, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(138, 180, 255, 0);
+  }
+}
+
+.movimentoRecente::before {
+  background: var(--accent);
+  border-color: var(--accent);
+  z-index: 1;
+  transform-origin: center;
+  animation: pulso 1.8s ease-in-out infinite;
+}
+
+.movimentoData {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.movimentoNome {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.movimentoOrgao {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.linkFonteTribunal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  width: fit-content;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+}
+
+.linkFonteTribunal:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.contagensCategorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.pillCategoria {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 12px;
+  min-height: 38px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pillCategoria:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.pillCategoriaAtiva {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.pillCategoriaAtiva:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--bg);
+}
+
+.pillBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  background: var(--surface-3);
+  border-radius: var(--radius-full);
+  color: var(--text);
+}
+
+.pillCategoriaAtiva .pillBadge {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--bg);
+}
+
+.filtrosDataWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filtroDataCampo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.filtroDataInput {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 0.875rem;
+  outline: none;
+  min-width: 0;
+}
+
+.filtroDataInput:focus {
+  border-color: var(--accent);
+}
+
+.filtroDataLabel {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.movimentoComplemento {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.agrupamento {
+  margin-top: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+}
+
+.agrupamentoSumario {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  font-weight: 500;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.agrupamentoConteudo {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.grupoCat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.grupoTitulo {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.fonteDados {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: var(--space-4);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.avisoVazio {
+  font-size: 0.875rem;
+  color: var(--text-3);
+  padding: var(--space-4) 0;
+  overflow-wrap: anywhere;
+}
+
+.avisoErroFiltro {
+  font-size: 0.875rem;
+  color: var(--danger);
+  background: var(--danger-dim);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599px) {
+  .cabecalho {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .acoes {
+    justify-content: flex-start;
+  }
+
+  .grade {
+    grid-template-columns: 1fr;
+  }
+
+  .filtrosTimeline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtroSelect,
+  .filtroInput {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .filtrosDataWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .filtroDataCampo {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .filtroDataInput {
+    width: 100%;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 767px) {
+  .grade {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media print {
+  .acoes,
+  .filtrosTimeline,
+  .contagensCategorias,
+  .agrupamento,
+  .botaoCopiarNumero {
+    display: none !important;
+  }
+
+  .documento {
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .movimento {
+    break-inside: avoid;
+  }
+}

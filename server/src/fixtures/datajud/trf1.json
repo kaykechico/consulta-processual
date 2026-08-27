@@ -1,0 +1,46 @@
+{
+  "numeroProcesso": "10000000320234010000",
+  "classe": { "codigo": 120, "nome": "Mandado de Segurança" },
+  "sistema": { "codigo": 3, "nome": "PJe" },
+  "formato": { "codigo": 1, "nome": "Eletrônico" },
+  "tribunal": "TRF1",
+  "dataHoraUltimaAtualizacao": "2024-03-15T18:00:00.000Z",
+  "grau": "G2",
+  "dataAjuizamento": "2023-01-10T09:00:00.000Z",
+  "movimentos": [
+    {
+      "codigo": 26,
+      "nome": "Distribuição por prevenção",
+      "dataHora": "2023-01-10T09:00:00.000Z",
+      "complementosTabelados": []
+    },
+    {
+      "codigo": 3,
+      "nome": "Decisão de concessão de liminar",
+      "dataHora": "2023-01-15T10:00:00.000Z",
+      "complementosTabelados": []
+    }
+  ],
+  "nivelSigilo": 0,
+  "orgaoJulgador": {
+    "codigo": 401,
+    "nome": "1ª Turma",
+    "codigoMunicipioIBGE": 5300108
+  },
+  "assuntos": [{ "codigo": 6017, "nome": "DIREITO TRIBUTÁRIO" }],
+  "partes": [
+    {
+      "nome": "Indústria e Comércio Brasil S/A",
+      "tipoParte": "Impetrante",
+      "advogados": [{ "nome": "Dra. Tributarista", "numeroOAB": "99999DF" }],
+      "representantes": []
+    },
+    {
+      "nome": "Delegado da Receita Federal do Brasil",
+      "tipoParte": "Impetrado",
+      "advogados": [],
+      "representantes": []
+    }
+  ],
+  "valor": 150000
+}

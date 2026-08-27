@@ -1,0 +1,45 @@
+{
+  "numeroProcesso": "00000018520239130000",
+  "classe": { "codigo": 283, "nome": "Ação Penal Militar" },
+  "sistema": { "codigo": 1, "nome": "e-Proc" },
+  "formato": { "codigo": 1, "nome": "Eletrônico" },
+  "tribunal": "TJMMG",
+  "dataHoraUltimaAtualizacao": "2024-04-12T15:00:00.000Z",
+  "grau": "G1",
+  "dataAjuizamento": "2023-05-15T09:00:00.000Z",
+  "movimentos": [
+    {
+      "codigo": 26,
+      "nome": "Distribuição",
+      "dataHora": "2023-05-15T09:00:00.000Z",
+      "complementosTabelados": []
+    },
+    {
+      "codigo": 193,
+      "nome": "Sentença absolutória proferida",
+      "dataHora": "2024-04-12T15:00:00.000Z",
+      "complementosTabelados": []
+    }
+  ],
+  "nivelSigilo": 0,
+  "orgaoJulgador": {
+    "codigo": 913,
+    "nome": "1ª Auditoria Militar Estadual",
+    "codigoMunicipioIBGE": 3106200
+  },
+  "assuntos": [{ "codigo": 11068, "nome": "Crimes Militares" }],
+  "partes": [
+    {
+      "nome": "Ministério Público Militar",
+      "tipoParte": "Autor",
+      "advogados": [],
+      "representantes": []
+    },
+    {
+      "nome": "Policial Militar Anonimizado",
+      "tipoParte": "Réu",
+      "advogados": [{ "nome": "Defensoria Pública", "numeroOAB": "DP-MG" }],
+      "representantes": []
+    }
+  ]
+}

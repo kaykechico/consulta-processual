@@ -1,0 +1,218 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: min(100% - 32px, var(--content-sm));
+  margin-inline: auto;
+  padding: var(--space-7) 0;
+  padding-top: calc(var(--space-7) + env(safe-area-inset-top));
+  padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom));
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: var(--space-6);
+  width: 100%;
+}
+
+.titulo {
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.subtitulo {
+  margin-top: var(--space-2);
+  font-size: 1rem;
+  color: var(--text-2);
+  max-width: 520px;
+}
+
+.formWrapper {
+  width: 100%;
+}
+
+.recentes {
+  width: 100%;
+  margin-top: var(--space-7);
+}
+
+.recentesCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.recentesTitulo {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.controlesHistorico {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.salvarToggle {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  min-height: 44px;
+}
+
+.salvarToggle input {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.limparTudo {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  transition: color 0.15s ease;
+}
+
+.limparTudo:hover {
+  color: var(--text);
+}
+
+.avisoHistorico {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  padding: var(--space-3) 0;
+  line-height: 1.4;
+}
+
+.recenteLista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.recenteItem {
+  display: flex;
+  align-items: stretch;
+  overflow-wrap: anywhere;
+}
+
+.recenteItem:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+.recenteBotao {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+  transition: background 0.15s ease;
+}
+
+.recenteBotao:hover {
+  background: var(--surface-2);
+}
+
+.recenteExcluir {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--text-3);
+  border-left: 1px solid var(--border);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.recenteExcluir:hover {
+  color: var(--danger);
+  background: var(--surface-2);
+}
+
+.rodape {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  font-size: 0.8125rem;
+  color: var(--text-3);
+}
+
+.rodape a {
+  color: var(--text-3);
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.rodape a:hover {
+  color: var(--text-2);
+}
+
+.rodape span {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-3);
+  user-select: none;
+}
+
+@media (max-width: 599px) {
+  .main {
+    justify-content: flex-start;
+    padding-top: calc(var(--space-6) + env(safe-area-inset-top));
+  }
+
+  .recentesCabecalho {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controlesHistorico {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "consulta-processual",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix shared && npm run build --prefix server && npm run build --prefix client",
+    "lint": "npm run lint --prefix server && npm run lint --prefix client",
+    "typecheck": "npm run typecheck --prefix server && npm run typecheck --prefix client && npm run typecheck --prefix shared",
+    "test": "npm run test --prefix shared --if-present && npm run test --prefix server --if-present && npm run test --prefix client --if-present",
+    "test:watch": "npm run test:watch --prefix shared --if-present",
+    "format": "prettier --write \"server/src/**/*.{ts,json}\" \"client/src/**/*.{ts,tsx,css,json}\" \"shared/src/**/*.{ts,json}\"",
+    "format:check": "prettier --check \"server/src/**/*.{ts,json}\" \"client/src/**/*.{ts,tsx,css,json}\" \"shared/src/**/*.{ts,json}\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.3"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

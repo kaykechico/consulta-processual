@@ -1,0 +1,45 @@
+{
+  "numeroProcesso": "06000008820246070000",
+  "classe": { "codigo": 11528, "nome": "Prestação de Contas Eleitorais" },
+  "sistema": { "codigo": 3, "nome": "PJe" },
+  "formato": { "codigo": 1, "nome": "Eletrônico" },
+  "tribunal": "TRE-DFT",
+  "dataHoraUltimaAtualizacao": "2024-11-01T10:00:00.000Z",
+  "grau": "G1",
+  "dataAjuizamento": "2024-09-01T08:00:00.000Z",
+  "movimentos": [
+    {
+      "codigo": 26,
+      "nome": "Distribuição automática",
+      "dataHora": "2024-09-01T08:00:00.000Z",
+      "complementosTabelados": []
+    },
+    {
+      "codigo": 193,
+      "nome": "Contas Julgadas Aprovadas",
+      "dataHora": "2024-11-01T10:00:00.000Z",
+      "complementosTabelados": []
+    }
+  ],
+  "nivelSigilo": 0,
+  "orgaoJulgador": {
+    "codigo": 607,
+    "nome": "1ª Zona Eleitoral do Distrito Federal",
+    "codigoMunicipioIBGE": 5300108
+  },
+  "assuntos": [{ "codigo": 11883, "nome": "Cargo - Deputado Distrital" }],
+  "partes": [
+    {
+      "nome": "Candidato Eleitoral Fictício",
+      "tipoParte": "Prestador de Contas",
+      "advogados": [{ "nome": "Advogado Eleitoralista", "numeroOAB": "33333DF" }],
+      "representantes": []
+    },
+    {
+      "nome": "Ministério Público Eleitoral",
+      "tipoParte": "Fiscal da Lei",
+      "advogados": [],
+      "representantes": []
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-4) 0;
+}
+
+.bloco {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.linha {
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.linhaTitulo {
+  width: 45%;
+  height: 24px;
+  margin-bottom: var(--space-2);
+}
+
+.linhaMeta {
+  width: 30%;
+  height: 14px;
+}
+
+.linhaMetaMedia {
+  width: 40%;
+  height: 14px;
+}
+
+.linhaValorMedia {
+  width: 60%;
+  height: 16px;
+}
+
+.linhaDataCurta {
+  width: 25%;
+  height: 10px;
+}
+
+.linhaTextoLongo {
+  width: 70%;
+  height: 14px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.gradeItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.linhaRotulo {
+  width: 40%;
+  height: 10px;
+}
+
+.linhaValor {
+  width: 80%;
+  height: 16px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.movimento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border);
+}
+
+@keyframes pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+}
